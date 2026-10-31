@@ -1,0 +1,41 @@
+here what I typed inside "Hello.txt"
+TEST line 1
+test line 2
+test line 3: Mathew
+test line 4: Puthiyaparambil
+
+
+
+here is what the output I obtained through uart 
+CMD0 R1 = 0x01
+CMD8 R1 = 0x01 R7 = 00 00 01 AA
+ACMD41 R1 = 0x00 (CMD55 = 0x01) 1 ms
+CMD58 R1=0x00 OCR=80 FF 80 00 CCS=0
+CMD16 R1 = 0x00
+mount: 0
+opendir: 0
+LOST.DIR  0 bytes
+SYSTEM~1  0 bytes
+HELLO.TXT  75 bytes
+open HELLO.TXT: 0
+content: TEST line 1
+test line 2
+test line 3: Mathew
+test line 4: put
+
+after line restriction removal 
+CMD0 R1 = 0x01
+CMD8 R1 = 0x01 R7 = 00 00 01 AA
+ACMD41 R1 = 0x00 (CMD55 = 0x01) 1 ms
+CMD58 R1=0x00 OCR=80 FF 80 00 CCS=0
+CMD16 R1 = 0x00
+mount: 0
+opendir: 0
+LOST.DIR  0 bytes
+SYSTEM~1  0 bytes
+HELLO.TXT  75 bytes
+open HELLO.TXT: 0
+TEST line 1
+test line 2
+test line 3: Mathew
+test line 4: Puthiyaparambil
