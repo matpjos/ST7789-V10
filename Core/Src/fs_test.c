@@ -34,7 +34,7 @@ void fs_run_test(void)
 	    fr = f_opendir(&dir, "/"); // fills dir and puts its cursor at the first entry of the root folder.
 	    uart_print("opendir: %d (%s)\r\n", fr, fr_str(fr));
 
-	    while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0]) // f_readdir(...) runs, so the call itself is what advances the cursor and fills fno.
+	    while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0]) // f_readdir(...) runs, so the call itself is what advances the cursor and fills fno; fno.fname[0] fails if no more file object exists.
 	    	uart_print("%s  %lu bytes\r\n", fno.fname, (unsigned long)fno.fsize);
 		  /* f_readdir(&dir, &fno) does two things:
 		   * 1. It copies the entry at the cursor into fno (name, size, date, attributes).
