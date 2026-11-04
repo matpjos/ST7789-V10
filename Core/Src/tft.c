@@ -50,18 +50,6 @@ static void tft_draw_char(uint16_t x, uint16_t y, const uint8_t *glyph, uint16_t
 static void tft_write(uint8_t dc, const uint8_t *buf, uint16_t len);
 
 
-
-/* function to send command
- * DC=low; then send command
- * then send parameters if any */
-static void tft_cmd(uint8_t cmd, const uint8_t *data, uint16_t len)
-{
-    tft_write(0, &cmd, 1);
-    if (len) tft_write(1, data, len);
-}
-
-
-
 /* function to sent a buffer of data
  * DC --> toggle DC. SET for data, RESET for command.
  * CS --> LOW to select display
@@ -73,6 +61,18 @@ static void tft_write(uint8_t dc, const uint8_t *buf, uint16_t len)
     HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(&hspi1, (uint8_t *)buf, len, 100);
     HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_SET);
+}
+
+
+
+
+/* function to send command
+ * DC=low; then send command
+ * then send parameters if any */
+static void tft_cmd(uint8_t cmd, const uint8_t *data, uint16_t len)
+{
+    tft_write(0, &cmd, 1);
+    if (len) tft_write(1, data, len);
 }
 
 
@@ -107,6 +107,7 @@ void tft_fill(uint16_t colour)
 }
 
 
+
 static void tft_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
     uint8_t xa[4] = { x0 >> 8, 	// Shifts the bits right by 8, leaving only the upper byte
@@ -128,6 +129,7 @@ static void tft_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 }
 
 
+
 static void tft_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t colour)
 {
     if (w == 0 || h == 0 || x >= TFT_W || y >= TFT_H) return;
@@ -137,12 +139,19 @@ static void tft_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16
     tft_set_window(x, y, x + w - 1, y + h - 1);   // end coordinates are inclusive
 
     uint8_t buf[512];
-    for (int i = 0; i < 512; i += 2) { buf[i] = colour >> 8; buf[i + 1] = colour & 0xFF; }
+    for (int i = 0; i < 512; i += 2)
+    {
+    	buf[i] = colour >> 8;       // 2 MSB nibbles saved to buf[i]; 2 lower nibbles shifts out
+    	buf[i + 1] = colour & 0xFF; // 2 LBS nibbles saved to buf[i+1]; higher nibbles cleared out using & operation.
+    }
+    /*colour is a 16-bit RGB565 value (e.g. red = 0xF800), but SPI sends one byte at a time, and each pixel needs 2 bytes. The loop fills line with the same pixel repeated 256 times
+     * colour >> 8 is the high byte and colour & 0xFF the low byte.
+     * The display wants the high byte first. The STM32 is little-endian, so a uint16_t sits in memory low byte first, and sending it directly would swap the colours. That’s why we split it by hand*/
 
     uint32_t remaining = (uint32_t)w * h * 2;     // 2 bytes per pixel
     HAL_GPIO_WritePin(TFT_DC_GPIO_Port, TFT_DC_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_RESET);
-    while (remaining) {
+    while (remaining) { // check if a chunk is still left to send
         uint16_t n = remaining > 512 ? 512 : remaining;
         HAL_SPI_Transmit(&hspi1, buf, n, 100);
         remaining -= n;
