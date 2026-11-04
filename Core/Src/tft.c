@@ -50,6 +50,34 @@ static void tft_draw_char(uint16_t x, uint16_t y, const uint8_t *glyph, uint16_t
 static void tft_write(uint8_t dc, const uint8_t *buf, uint16_t len);
 
 
+
+/* function to send command
+ * DC=low; then send command
+ * then send parameters if any */
+static void tft_cmd(uint8_t cmd, const uint8_t *data, uint16_t len)
+{
+    tft_write(0, &cmd, 1);
+    if (len) tft_write(1, data, len);
+}
+
+
+
+/* function to sent a buffer of data
+ * DC --> toggle DC. SET for data, RESET for command.
+ * CS --> LOW to select display
+ * use SPI to transmit HAL
+ * Then release CS pin to de-select. */
+static void tft_write(uint8_t dc, const uint8_t *buf, uint16_t len)
+{
+    HAL_GPIO_WritePin(TFT_DC_GPIO_Port, TFT_DC_Pin, dc ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(&hspi1, (uint8_t *)buf, len, 100);
+    HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_SET);
+}
+
+
+
+
 /*run init sequence:
  * RST LOW for 10ms; high for 120ms (pulsing RST) wait for display wake up */
 void tft_init(void)
@@ -68,20 +96,35 @@ void tft_init(void)
     tft_cmd(0x29, NULL, 0);            HAL_Delay(120);  // display on
 }
 
+
+
 /* set boundaries
- * call RASET, CASET commands*/
+ * call RASET, CASET commands
+ * full screen fill*/
 void tft_fill(uint16_t colour)
 {
 	tft_fill_rect(0, 0, TFT_W, TFT_H, colour);
 }
 
-/* function to send command
- * DC=low; then send command
- * then send parameters if any */
-static void tft_cmd(uint8_t cmd, const uint8_t *data, uint16_t len)
+
+static void tft_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
-    tft_write(0, &cmd, 1);
-    if (len) tft_write(1, data, len);
+    uint8_t xa[4] = { x0 >> 8, 	// Shifts the bits right by 8, leaving only the upper byte
+    		x0 & 0xFF, 			// Masks off everything except the lower 8 bits
+    		x1 >> 8, x1 & 0xFF  // same technique; because each coordinate is 16 bits, but SPI sends one byte at a time, so the code splits it into a high byte and a low byte
+    };
+    uint8_t ya[4] = { y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF }; // same method of making xa[] above
+    uint8_t ramwr = 0x2C;
+
+    /* Why a split is needed:
+     * The ST7789 expects four bytes for each window command (0x2A columns, 0x2B rows)
+     * 0x2A for columns; 0x2B for rows
+     * 0x2A	CASET (Column Address Set)
+     * 0x2B	RASET (Row Address Set)
+     * 0x2C	RAMWR (Memory Write) --> Pixel data follows*/
+    tft_cmd(0x2A, xa, 4);
+    tft_cmd(0x2B, ya, 4);
+    tft_write(0, &ramwr, 1);      // pixels follow
 }
 
 
@@ -108,16 +151,6 @@ static void tft_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16
 }
 
 
-static void tft_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
-{
-    uint8_t xa[4] = { x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF };
-    uint8_t ya[4] = { y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF };
-    uint8_t ramwr = 0x2C;
-
-    tft_cmd(0x2A, xa, 4);
-    tft_cmd(0x2B, ya, 4);
-    tft_write(0, &ramwr, 1);      // pixels follow
-}
 
 
 static void tft_draw_char(uint16_t x, uint16_t y, const uint8_t *glyph, uint16_t fg, uint16_t bg, uint8_t scale)
@@ -147,19 +180,6 @@ static void tft_draw_char(uint16_t x, uint16_t y, const uint8_t *glyph, uint16_t
     tft_write(1, char_buf, i);
 }
 
-
-/* function to sent a buffer of data
- * DC --> toggle DC. SET for data, RESET for command.
- * CS --> LOW to select display
- * use SPI to transmit HAL
- * Then release CS pin to de-select. */
-static void tft_write(uint8_t dc, const uint8_t *buf, uint16_t len)
-{
-    HAL_GPIO_WritePin(TFT_DC_GPIO_Port, TFT_DC_Pin, dc ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(&hspi1, (uint8_t *)buf, len, 100);
-    HAL_GPIO_WritePin(TFT_CS_GPIO_Port, TFT_CS_Pin, GPIO_PIN_SET);
-}
 
 
 /*x-Axis coordinates, Y-Axis coordinates, String, FG, BG, text-scale*/
