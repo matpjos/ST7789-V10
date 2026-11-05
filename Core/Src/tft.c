@@ -170,7 +170,11 @@ static void tft_draw_char(uint16_t x, uint16_t y, const uint8_t *glyph, uint16_t
     uint16_t w = 6 * scale;
     uint16_t h = 8 * scale;
 
-    /* Skip characters that don't fit entirely on screen */
+    /* Skip characters that don't fit entirely on screen
+     * 5 columns + 1 blank space
+     * 7 rows + 1 blank space
+     * The spacing column (col 5) and spacing row (row 7) are always bg
+     *  */
     if (x + w > TFT_W || y + h > TFT_H) return;
 
     uint16_t i = 0;
