@@ -120,8 +120,8 @@ int main(void)
 
 
   // testing tft_draw_string function
-  tft_fill(0x0000);
-  tft_draw_string(10, 10, "Hello Mathew!", 0xFFFF, 0x0000, 3);
+  tft_fill(0x0000); // bg color
+  tft_draw_string(10, 10, "Hello Mathew!", 0xFFFF, 0x0000, 3); //(x, y, string, fg, bg, scale)
   tft_draw_string(10, 40, "This is a test print", 0xFFFF, 0x0000, 2);
   tft_draw_string(10, 70, "CONGRATULATIONS-it works.", 0xFFFF, 0x0000, 2);
   tft_draw_string(10, 100, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0xFFFF, 0x0000, 2);

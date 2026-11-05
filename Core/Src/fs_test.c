@@ -3,6 +3,10 @@
  *
  *  Created on: 30 Oct 2026
  *      Author: matpj
+ *
+ * Works on top of FatFs.
+ * Reads content from HELLO.TXT (if available) saved in the SD card and displays over UART.
+ * Write a string to 'LOG.TXT' file SD card; Later to develop this to accept log data to save to SD card
  */
 
 #include "fs_test.h"

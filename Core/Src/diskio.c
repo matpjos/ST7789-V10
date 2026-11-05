@@ -1,5 +1,5 @@
 /* diskio.c is originally from FatFs.
- * I modified this to link FatFs to my driver functions
+ * I modified this to link FatFs to my driver functions an now works as glue / adapter function
  * EnjOy :) */
 #include "ff.h"
 #include "diskio.h"

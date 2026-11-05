@@ -3,6 +3,9 @@
  *
  *  Created on: 30 Oct 2026
  *      Author: matpj
+ *
+ *  Works on top of FatFs
+ *  prints error description of corresponding function-return-error-codes
  */
 
 #include "debug.h"
