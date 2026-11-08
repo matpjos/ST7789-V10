@@ -1,4 +1,6 @@
 /* USER CODE BEGIN Header */
+/*
+ *
 // v1- this code fills color RGB one after another.
 // v2- trying to add tft_fill_rect()- done
 // added character write to display
@@ -10,8 +12,12 @@
 // v6 moved sd functions to dedicated files.
 // v7 moved tft function to separate files
 // v10 added fs_test.c.
-// testing new branch
+// Shared with GitHub
+// created branch for features/sd_debug
+ *
+ * https://docs.google.com/document/d/1ZJOHVxbNSykoR235Ihzmc-WmFaMbpkd_DGbw0OYxWb4/edit?usp=sharing
 
+*/
 
 
 /**
@@ -46,6 +52,7 @@
 #include "tft.h"
 #include "ff.h"
 #include "fs_test.h"
+#include "sd_debug.h"
 
 
 /* USER CODE END Includes */
@@ -117,6 +124,20 @@ int main(void)
   /* USER CODE BEGIN 2 */
   tft_init();
 
+  /* Driver level SD init(), reading sector-0, printing in UART
+   * probing partition to print */
+  uint8_t sd_rc = sd_init();
+    if (sd_rc == SD_OK)
+    {
+        sd_dump_sector(0);
+        sd_probe_partition();
+    }
+    else
+    {
+        char m[32];
+        int k = snprintf(m, sizeof m, "SD init failed, code %u\r\n", sd_rc);
+        HAL_UART_Transmit(&huart2, (uint8_t *)m, k, 100);
+    }
 
 
 

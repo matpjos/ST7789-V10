@@ -9,8 +9,8 @@
  * Write a string to 'LOG.TXT' file SD card; Later to develop this to accept log data to save to SD card
  */
 
+#include <FatFs_debug.h>
 #include "fs_test.h"
-#include "debug.h"
 #include "ff.h"
 
 static FATFS fs;  //Filesystem object structure (FATFS); work area for the volume (holds a 512-byte window)

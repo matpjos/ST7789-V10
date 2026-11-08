@@ -26,6 +26,7 @@ static uint8_t sd_init_inner(void);
 static uint8_t sd_wait_ready(uint32_t timeout_ms);
 
 
+
 uint8_t sd_init(void)
 {
     sd_is_hc = 0; //reassigned during CMD58

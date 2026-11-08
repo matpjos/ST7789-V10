@@ -105,7 +105,7 @@ void sd_probe_partition(void)
     /* offset 0   = 0xEB / 0xE9 indicates FAT boot sector
      * offset 510 = 0x55 and
      * offset 511 = 0xAA indicates boot signature
-     * offset 450 = type (in MBR, SECTOR-0)
+     * offset 450 = Partition Type (in MBR, SECTOR-0)
      * offset 454 = Partition start sector, little-endian; (in MBR, SECTOR-0) */
     if (sd_read_block(0, sd_buf) != 0) {
         k = snprintf(m, sizeof m, "probe: read sector 0 failed\r\n");
