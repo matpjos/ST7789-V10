@@ -3,6 +3,9 @@
  *
  *  Created on: 24 Oct 2026
  *      Author: matpj
+ *
+ *    ### Basic SD Driver code ###
+ *
  */
 
 #include "sd.h"
@@ -12,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static uint8_t sd_is_hc = 0;
+static uint8_t sd_is_hc = 0; //reassigned during CMD58
 
 static uint8_t spi_xfer(uint8_t b);
 static void    sd_set_slow(void);
@@ -25,11 +28,13 @@ static uint8_t sd_wait_ready(uint32_t timeout_ms);
 
 uint8_t sd_init(void)
 {
-    sd_is_hc = 0;
-    uint8_t rc = sd_init_inner();
+    sd_is_hc = 0; //reassigned during CMD58
+    uint8_t rc = sd_init_inner(); // sd_init() was created and sd_init_inner() moved into it to avoid repeated sd_set_slow() call
     sd_set_fast();
     return rc;
 }
+
+
 
 static uint8_t sd_init_inner(void)
 {
@@ -61,6 +66,7 @@ static uint8_t sd_init_inner(void)
     uint8_t is_v2 = 0;
 
 	r = sd_cmd(8, 0x000001AA, 0x87);
+
 	if (r == 0x01) {   /* v2+ card: 4 more bytes follow */
 		for (int i = 0; i < 4; i++)
 			r7[i] = spi_xfer(0xFF);
@@ -77,10 +83,12 @@ static uint8_t sd_init_inner(void)
 			return SD_ERR_CMD8;          /* bad voltage range or echo mismatch */
 		is_v2 = 1;
 	}
+
 	else if (r & 0x04)
 	{
 		is_v2 = 0;                       /* illegal command: v1.x SDSC card, still valid */
 	}
+
 	else
 	{
 		return SD_ERR_CMD8;              /* no reply (0xFF) or unexpected R1 */
