@@ -161,8 +161,3 @@ void sd_probe_partition(void)
     sd_dump_sector(start);              /* the FAT boot sector, if the table is sane */
 }
 
-
-
-
-
-

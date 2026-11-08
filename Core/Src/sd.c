@@ -219,7 +219,7 @@ static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc)
 }
 
 
- /* basic driver to read a block*/
+ /* basic driver to read a block; CMD17*/
 uint8_t sd_read_block (uint32_t sector, uint8_t *buf)
 	{
 	uint32_t addr = sd_is_hc ? sector : sector * 512;
@@ -230,7 +230,7 @@ uint8_t sd_read_block (uint32_t sector, uint8_t *buf)
 		{
 		// r!=0 indicates cmd17 not-ok
 		sd_deselect();
-		//add a "uart print R1" here to let the user know the error flag
+		//add a "uart print R1" here to let the user know the error flag TODO;
 		return SD_ERR_CMD17; }
 
 	uint8_t tok;
