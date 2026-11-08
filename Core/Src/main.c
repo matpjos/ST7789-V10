@@ -52,7 +52,7 @@
 #include "tft.h"
 #include "ff.h"
 #include "fs_test.h"
-#include "sd_debug.h"
+#include "sdDriver_debug.h"
 
 
 /* USER CODE END Includes */
@@ -134,9 +134,11 @@ int main(void)
     }
     else
     {
-        char m[32];
-        int k = snprintf(m, sizeof m, "SD init failed, code %u\r\n", sd_rc);
-        HAL_UART_Transmit(&huart2, (uint8_t *)m, k, 100);
+        char m[96];
+        int k = snprintf(m, sizeof m, "SD init failed, code %u: %s\r\n",
+                         sd_rc, sd_err_str(sd_rc));
+        if (k > (int)sizeof m - 1) k = sizeof m - 1;
+        if (k > 0) HAL_UART_Transmit(&huart2, (uint8_t *)m, k, 100);
     }
 
 
