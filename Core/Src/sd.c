@@ -227,11 +227,17 @@ uint8_t sd_read_block (uint32_t sector, uint8_t *buf)
 
 	uint8_t r = sd_cmd(17, addr, 0x01);
 	if (r != 0x00) // r=0 indicates cmd17 ok
-		{
+	{
 		// r!=0 indicates cmd17 not-ok
 		sd_deselect();
-		//add a "uart print R1" here to let the user know the error flag TODO;
-		return SD_ERR_CMD17; }
+
+		char msg[64];
+		int n = snprintf(msg, sizeof msg, "Error, CMD17 R1 = 0x%02X (expected 0x00)\r\n", r);
+		if (n > (int)sizeof msg - 1) n = sizeof msg - 1;
+		if (n > 0) HAL_UART_Transmit(&huart2, (uint8_t *)msg, n, 100);
+
+		return SD_ERR_CMD17;
+	}
 
 	uint8_t tok;
 	uint32_t t0 = HAL_GetTick();
@@ -240,7 +246,16 @@ uint8_t sd_read_block (uint32_t sector, uint8_t *buf)
 		}
 	while (tok == 0xFF && (HAL_GetTick() - t0) < 200);
 
-	if (tok != 0xFE) { sd_deselect(); return SD_ERR_READ_TOKEN; } /* 0xFE = start of data */
+	if (tok != 0xFE)
+	{
+	    sd_deselect();
+
+	    char msg[96];
+		int n = snprintf(msg, sizeof msg, "CMD17 data token = 0x%02X (expected 0xFE)%s\r\n", tok, (tok == 0xFF) ? ", timed out" : "");
+		if (n > (int)sizeof msg - 1) n = sizeof msg - 1;
+		if (n > 0) HAL_UART_Transmit(&huart2, (uint8_t *)msg, n, 100);
+
+	    return SD_ERR_READ_TOKEN; } /* 0xFE = start of data */
 
 	for (int i = 0; i < 512; i++)
 		buf[i] = spi_xfer(0xFF); // loading data to buf[]
@@ -278,7 +293,7 @@ uint8_t sd_write_block(uint32_t sector, const uint8_t *buf)
 					addr, 0x01 // CRC
 				);
     if (r != 0x00) // need to be 0x00 to be "accepted"
-    	{ sd_deselect(); return SD_ERR_CMD24; } // to-do here should be SD_ERR_CMD0?
+    	{ sd_deselect(); return SD_ERR_CMD24; } // to-do
 
     spi_xfer(0xFF);                 /* one gap byte */
     spi_xfer(0xFE);                 /* start-of-data token */
