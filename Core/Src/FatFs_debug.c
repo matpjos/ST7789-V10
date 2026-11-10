@@ -8,7 +8,7 @@
  *  prints error description of corresponding function-return-error-codes
  */
 
-#include "debug.h"
+#include <FatFs_debug.h>
 #include "main.h"
 #include "usart.h"
 #include <stdarg.h>

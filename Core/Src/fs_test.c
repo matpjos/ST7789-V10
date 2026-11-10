@@ -10,7 +10,7 @@
  */
 
 #include "fs_test.h"
-#include "debug.h"
+#include <FatFs_debug.h>
 #include "ff.h"
 
 static FATFS fs;  //Filesystem object structure (FATFS); work area for the volume (holds a 512-byte window)

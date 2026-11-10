@@ -1,4 +1,5 @@
 /* USER CODE BEGIN Header */
+/*
 // v1- this code fills color RGB one after another.
 // v2- trying to add tft_fill_rect()- done
 // added character write to display
@@ -10,9 +11,12 @@
 // v6 moved sd functions to dedicated files.
 // v7 moved tft function to separate files
 // v10 added fs_test.c.
+// Shared with GitHub
+// created branch for features/sd_debug
 
+ * More details at https://docs.google.com/document/d/1ZJOHVxbNSykoR235Ihzmc-WmFaMbpkd_DGbw0OYxWb4/edit?usp=sharing
 
-
+*/
 /**
   ******************************************************************************
   * @file           : main.c
@@ -127,7 +131,7 @@ int main(void)
   tft_draw_string(10, 100, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0xFFFF, 0x0000, 2);
   tft_draw_string(10, 130, "abcdefghijklmnopqrstuvwxyz 0123456789", 0xFFFF, 0x0000, 2);
 
-  fs_run_test();
+  fs_run_test(); // todo check this working at features/debug
 
   /* USER CODE END 2 */
 

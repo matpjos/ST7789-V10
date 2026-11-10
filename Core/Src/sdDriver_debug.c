@@ -1,5 +1,5 @@
 /*
- * sd_debug.c
+ * sdDriver_debug.c
  *
  *  Created on: 24 Oct 2026
  *      Author: matpj
@@ -11,7 +11,7 @@
  * sd_dump_sector()     : Reads data of a sector, calls uart_hexdump()
  * uart_hexdump()       : UART printing of buf[]
  */
-#include "sd_debug.h"
+#include <sdDriver_debug.h>
 #include "sd.h"
 #include "main.h"
 #include "usart.h"
@@ -22,6 +22,28 @@
 static uint8_t sd_buf[512];
 static uint32_t le32(const uint8_t *p);
 
+/* Indexed by the SD_* enum in sd.h. Designated initialisers keep each
+ * string tied to its enum name, so reordering the enum can't misalign them. */
+static const char *const sd_err_text[] = {
+    [SD_OK]             = "Function succeeded",
+    [SD_ERR_CMD0]       = "CMD0: no idle reply (card missing, wiring or CS)",
+    [SD_ERR_CMD8]       = "CMD8: bad reply, voltage or echo mismatch",
+    [SD_ERR_ACMD41]     = "ACMD41: card not ready within 1 s",
+    [SD_ERR_CMD58]      = "CMD58: OCR read failed or power-up bit not set",
+    [SD_ERR_CMD16]      = "CMD16: block length 512 rejected",
+    [SD_ERR_CMD17]      = "CMD17: read command rejected",
+    [SD_ERR_READ_TOKEN] = "No 0xFE data token after CMD17",
+    [SD_ERR_CMD24]      = "CMD24: write command rejected",
+    [SD_ERR_WRITE_DATA] = "Write data response not accepted",
+    [SD_ERR_WRITE_BUSY] = "Card stayed busy after write (timeout)"
+};
+
+const char *sd_err_str(uint8_t rc)
+{
+    if (rc < sizeof sd_err_text / sizeof sd_err_text[0] && sd_err_text[rc])
+        return sd_err_text[rc];
+    return "Unknown error";
+}
 
 
 /* 21/10/2026
@@ -105,7 +127,7 @@ void sd_probe_partition(void)
     /* offset 0   = 0xEB / 0xE9 indicates FAT boot sector
      * offset 510 = 0x55 and
      * offset 511 = 0xAA indicates boot signature
-     * offset 450 = type (in MBR, SECTOR-0)
+     * offset 450 = Partition Type (in MBR, SECTOR-0)
      * offset 454 = Partition start sector, little-endian; (in MBR, SECTOR-0) */
     if (sd_read_block(0, sd_buf) != 0) {
         k = snprintf(m, sizeof m, "probe: read sector 0 failed\r\n");

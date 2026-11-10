@@ -5,8 +5,8 @@
  *      Author: matpj
  */
 
-#ifndef INC_DEBUG_H_
-#define INC_DEBUG_H_
+#ifndef INC_FATFS_DEBUG_H_
+#define INC_FATFS_DEBUG_H_
 #include "ff.h"
 
 /* printf-style output over UART2. The attribute makes the compiler check
@@ -16,4 +16,4 @@ void uart_print(const char *fmt, ...) __attribute__((format(printf, 1, 2))); //t
 /* FRESULT code -> readable text */
 const char *fr_str(FRESULT fr);
 
-#endif /* INC_DEBUG_H_ */
+#endif /* INC_FATFS_DEBUG_H_ */
