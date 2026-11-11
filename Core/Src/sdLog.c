@@ -28,7 +28,7 @@ static FATFS  fs;
 static FIL    fil;
 static uint8_t mounted = 0;
 
-/* Default: no RTC present. Override by defining this function elsewhere. */
+/* Default: no RTC present. TODO Override this function elsewhere once we have an RTC. */
 __weak bool sdlog_rtc_get(sdlog_time_t *t)
 {
     (void)t;
