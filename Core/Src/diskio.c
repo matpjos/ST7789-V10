@@ -3,7 +3,7 @@
  * EnjOy :) */
 #include "ff.h"
 #include "diskio.h"
-#include "sd.h"
+#include "sdDriver.h"
 
 static DSTATUS stat = STA_NOINIT;
 

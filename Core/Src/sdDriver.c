@@ -8,7 +8,7 @@
  *
  */
 
-#include "sd.h"
+#include "sdDriver.h"
 #include "main.h"      /* SD_CS / TFT_CS pin names */
 #include "spi.h"
 #include "usart.h"

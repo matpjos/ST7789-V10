@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "sd.h"
+#include "sdDriver.h"
 #include "tft.h"
 #include "ff.h"
 #include "fs_test.h"

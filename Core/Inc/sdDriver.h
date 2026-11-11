@@ -5,8 +5,8 @@
  *      Author: matpj
  */
 
-#ifndef INC_SD_H_
-#define INC_SD_H_
+#ifndef INC_SDRIVER_H_
+#define INC_SDDRIVER_H_
 #include <stdint.h>
 
 uint8_t  sd_init(void);
@@ -26,4 +26,4 @@ enum { 	SD_OK 				= 0,
 		SD_ERR_WRITE_BUSY   =10
 	};
 
-#endif /* INC_SD_H_ */
+#endif /* INC_SDDRIVER_H_ */

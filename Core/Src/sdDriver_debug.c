@@ -12,7 +12,7 @@
  * uart_hexdump()       : UART printing of buf[]
  */
 #include <sdDriver_debug.h>
-#include "sd.h"
+#include "sdDriver.h"
 #include "main.h"
 #include "usart.h"
 #include <stdio.h>
