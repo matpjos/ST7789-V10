@@ -1,18 +1,5 @@
 /* USER CODE BEGIN Header */
-/*
-// v1- this code fills color RGB one after another.
-// v2- trying to add tft_fill_rect()- done
-// added character write to display
-// added string write to display
-// v3- added font scaling factor to the functions tft_draw_string. functions updated: tft_draw_string and tft_draw_char
-// v4 - adding memory card support
-// v5 deleted unnecessary test codes.
-// moved linked files to direct access. check 'generate under root'
-// v6 moved sd functions to dedicated files.
-// v7 moved tft function to separate files
-// v10 added fs_test.c.
-// Shared with GitHub
-// created branch for features/sd_debug
+/* A simple program to write logs to an SD card inside ST7789 module.
 
  * More details at https://docs.google.com/document/d/1ZJOHVxbNSykoR235Ihzmc-WmFaMbpkd_DGbw0OYxWb4/edit?usp=sharing
 
@@ -132,7 +119,6 @@ int main(void)
   tft_draw_string(10, 100, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0xFFFF, 0x0000, 2);
   tft_draw_string(10, 130, "abcdefghijklmnopqrstuvwxyz 0123456789", 0xFFFF, 0x0000, 2);
 
-  //fs_run_test(); // todo check this working at features/debug
 
   if (sd_init() == SD_OK)
   {

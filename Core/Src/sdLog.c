@@ -43,7 +43,7 @@ static int make_stamp(char *out, size_t size)
 
     if (sdlog_rtc_get(&t))
     {	//RTC present
-        return snprintf(out, size, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.min, t.sec); // TODO HOW OUT works here? it is a char!
+        return snprintf(out, size, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.min, t.sec); // untested yet
     }
 
     /* no RTC:
@@ -73,56 +73,6 @@ FRESULT sdlog_init(void)
 
 
 
-/*FRESULT sdlog_str(const char *s)
-{
-    if (!mounted) return FR_NOT_READY;
-
-    static char line[SDLOG_LINE_MAX];
-    int n = make_stamp(line, sizeof line);
-     n=a cursor. It tracks how many characters are in line so far, so the next write knows where to start;
-     * snprintf returns the length of the text it wrote (not counting the \0)
-
-    n += snprintf(line + n, // move cursor after time stamp
-    		sizeof line - n,// SDLOG_LINE_MAX - n = truncation implemented (max permissible write)
-    		": %s\r\n", s);
-
-    if (n > (int)sizeof line - 1)
-    {    truncated / clamped: keep the line ending, because The return value of snprintf is the length it wanted to write, not what it actually stored
-    	n = sizeof line - 1;
-        line[n - 2] = '\r';
-        line[n - 1] = '\n';
-    }
-
-    FRESULT fr = f_open(&fil, SDLOG_FILE, FA_WRITE | FA_OPEN_APPEND);
-    if (fr != FR_OK)
-    {
-        uart_print("f_open error: %d (%s)\r\n", fr, fr_str(fr));
-    	return fr;
-    }
-
-    UINT bw;
-    fr = f_write(&fil, line, (UINT)n, &bw);
-    FRESULT fc = f_close(&fil);          close flushes to the card
-
-    if (fr == FR_OK && bw != (UINT)n) fr = FR_DISK_ERR;
-    return (fr != FR_OK) ? fr : fc;
-}*/
-
-
-
-/*FRESULT sdlog(const char *fmt, ...)
-{
-    char msg[96];
-    va_list ap;
-    va_start(ap, fmt);
-    vsnprintf(msg, sizeof msg, fmt, ap);
-    va_end(ap);
-    return sdlog_str(msg);
-}*/
-
-
-/* va_list log function
- * writes to line[] then to sd-card */
 static FRESULT log_va_list(const char *fmt, va_list ap)
 {
     if (!mounted) return FR_NOT_READY;
