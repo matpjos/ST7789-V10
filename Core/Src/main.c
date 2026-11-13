@@ -49,6 +49,7 @@
 #include "tft.h"
 #include "ff.h"
 #include "fs_test.h"
+#include "sdLog.h"
 
 
 /* USER CODE END Includes */
@@ -131,7 +132,15 @@ int main(void)
   tft_draw_string(10, 100, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0xFFFF, 0x0000, 2);
   tft_draw_string(10, 130, "abcdefghijklmnopqrstuvwxyz 0123456789", 0xFFFF, 0x0000, 2);
 
-  fs_run_test(); // todo check this working at features/debug
+  //fs_run_test(); // todo check this working at features/debug
+
+  if (sd_init() == SD_OK)
+  {
+	  uint16_t adc_value = 2048;
+	  sdlog_init();                    /* mounts, writes "=== BOOT ===" */
+      sdlog("ADC = %u", adc_value);    /* printf-style */
+      sdlog_str("plain text, 100% safe");
+  }
 
   /* USER CODE END 2 */
 

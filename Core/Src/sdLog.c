@@ -60,32 +60,34 @@ static int make_stamp(char *out, size_t size)
 
 
 
-FRESULT sdlog_init(void) // todo check with gpt. if mounted check added. need only one initial mount message.
+FRESULT sdlog_init(void)
 {
     if (mounted == 1) // avoid repeated UART messages.
     		return FR_OK;
 
-    	FRESULT fr = f_mount(&fs, "", 1);   /* 1 = mount-now or Force-mounted */
-		if (fr != FR_OK) return fr;
-		mounted = 1;
-		return sdlog_str("=== SD BOOT Success ===");
+	FRESULT fr = f_mount(&fs, "", 1);   /* 1 = mount-now or Force-mounted */
+	if (fr != FR_OK) return fr;
+	mounted = 1;
+	return sdlog_str("=== SD BOOT Success ===");
 }
 
 
 
-FRESULT sdlog_str(const char *s)
+/*FRESULT sdlog_str(const char *s)
 {
     if (!mounted) return FR_NOT_READY;
 
     static char line[SDLOG_LINE_MAX];
-    int n = make_stamp(line, sizeof line); // n=a cursor. It tracks how many characters are in line so far, so the next write knows where to start; snprintf returns the length of the text it wrote (not counting the \0)
+    int n = make_stamp(line, sizeof line);
+     n=a cursor. It tracks how many characters are in line so far, so the next write knows where to start;
+     * snprintf returns the length of the text it wrote (not counting the \0)
+
     n += snprintf(line + n, // move cursor after time stamp
-    		sizeof line - n,// SDLOG_LINE_MAX - n = truncation implemented
+    		sizeof line - n,// SDLOG_LINE_MAX - n = truncation implemented (max permissible write)
     		": %s\r\n", s);
 
     if (n > (int)sizeof line - 1)
-    {
-    	/* truncated / clamped: keep the line ending, because The return value of snprintf is the length it wanted to write, not what it actually stored*/
+    {    truncated / clamped: keep the line ending, because The return value of snprintf is the length it wanted to write, not what it actually stored
     	n = sizeof line - 1;
         line[n - 2] = '\r';
         line[n - 1] = '\n';
@@ -100,15 +102,15 @@ FRESULT sdlog_str(const char *s)
 
     UINT bw;
     fr = f_write(&fil, line, (UINT)n, &bw);
-    FRESULT fc = f_close(&fil);         /* close flushes to the card */
+    FRESULT fc = f_close(&fil);          close flushes to the card
 
     if (fr == FR_OK && bw != (UINT)n) fr = FR_DISK_ERR;
     return (fr != FR_OK) ? fr : fc;
-}
+}*/
 
 
 
-FRESULT sdlog(const char *fmt, ...)
+/*FRESULT sdlog(const char *fmt, ...)
 {
     char msg[96];
     va_list ap;
@@ -116,4 +118,50 @@ FRESULT sdlog(const char *fmt, ...)
     vsnprintf(msg, sizeof msg, fmt, ap);
     va_end(ap);
     return sdlog_str(msg);
+}*/
+
+
+/* va_list log function
+ * writes to line[] then to sd-card */
+static FRESULT log_va_list(const char *fmt, va_list ap)
+{
+    if (!mounted) return FR_NOT_READY;
+
+    static char line[SDLOG_LINE_MAX];
+    int n = make_stamp(line, sizeof line);
+    n += snprintf(line + n, sizeof line - n, ": ");
+    n += vsnprintf(line + n, sizeof line - n, fmt, ap);
+    /* n=a cursor. It tracks how many characters are in line so far,
+     * so the next write knows where to start;
+     * snprintf returns the length of the text it wrote
+     * -(not counting the \0) */
+
+    if (n > (int)sizeof line - 3) n = sizeof line - 3;
+    /* truncated: leave room for \r\n */
+    line[n++] = '\r';
+    line[n++] = '\n';
+
+    FRESULT fr = f_open(&fil, SDLOG_FILE, FA_WRITE | FA_OPEN_APPEND);
+    if (fr != FR_OK) return fr;
+
+    UINT bw;
+    fr = f_write(&fil, line, (UINT)n, &bw);
+    FRESULT fc = f_close(&fil); /* close flushes to the card */
+
+    if (fr == FR_OK && bw != (UINT)n) fr = FR_DISK_ERR;
+    return (fr != FR_OK) ? fr : fc;
+}
+
+FRESULT sdlog(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    FRESULT fr = log_va_list(fmt, ap);
+    va_end(ap);
+    return fr;
+}
+
+FRESULT sdlog_str(const char *s)
+{
+    return sdlog("%s", s);          /* "%s" keeps '%' in s safe */
 }
